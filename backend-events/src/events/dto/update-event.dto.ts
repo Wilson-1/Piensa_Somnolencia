@@ -1,11 +1,14 @@
-import { IsOptional, IsISO8601, IsString } from 'class-validator';
+import { IsOptional, IsISO8601, IsString, IsNotEmpty } from 'class-validator';
 
 export class UpdateEventDto {
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   title?: string;
 
   @IsOptional()
+  @IsString()
+  @IsNotEmpty()
   description?: string;
 
   @IsOptional()
