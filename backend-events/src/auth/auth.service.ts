@@ -1,38 +1,37 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { RegisterDto } from './dto/register.dto';
-import * as bcrypt from 'bcrypt';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (existing) throw new BadRequestException({ message: 'Email already exists' });
-
-    const hashed = await bcrypt.hash(dto.password, 10);
-    await this.prisma.user.create({
-      data: { name: dto.name, email: dto.email, password: hashed }
-    });
-
-    return { message: 'User created successfully' };
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
+    if (user && await bcrypt.compare(password, user.password)) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 
-  async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new UnauthorizedException({ message: 'Invalid credentials' });
-
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) throw new UnauthorizedException({ message: 'Invalid credentials' });
-
-    const payload = { sub: user.id, email: user.email, name: user.name };
-    const token = this.jwtService.sign(payload);
-
+  async login(user: any) {
+    const payload = { username: user.email, sub: user.id };
     return {
-      token,
-      user: { id: user.id, name: user.name, email: user.email }
+      access_token: this.jwtService.sign(payload),
+      user,
     };
   }
+
+async register(createUserDto: any) {
+  // Solo llamamos al service, porque el UserService ya se encarga de encriptar
+  const newUser = await this.userService.create(createUserDto);
+  
+  // Retornamos el login para que el frontend reciba el token de una vez
+  return this.login(newUser);
+}
 }

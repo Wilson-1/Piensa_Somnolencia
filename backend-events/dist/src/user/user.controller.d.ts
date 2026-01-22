@@ -1,19 +1,42 @@
 import { UserService } from './user.service';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 export declare class UserController {
-    private userService;
+    private readonly userService;
     constructor(userService: UserService);
-    getProfile(req: any): Promise<{
-        name: string;
-        email: string;
-        id: number;
-        createdAt: Date;
-    }>;
-    updateProfile(req: any, dto: UpdateProfileDto): Promise<{
+    create(createUserDto: CreateUserDto): Promise<{
         name: string;
         email: string;
         password: string;
         id: number;
         createdAt: Date;
     }>;
+    findAll(): import("@prisma/client").Prisma.PrismaPromise<{
+        name: string;
+        email: string;
+        password: string;
+        id: number;
+        createdAt: Date;
+    }[]>;
+    findOne(id: string): import("@prisma/client").Prisma.Prisma__UserClient<{
+        name: string;
+        email: string;
+        password: string;
+        id: number;
+        createdAt: Date;
+    } | null, null, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    update(id: string, updateUserDto: UpdateUserDto): import("@prisma/client").Prisma.Prisma__UserClient<{
+        name: string;
+        email: string;
+        password: string;
+        id: number;
+        createdAt: Date;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    remove(id: string): import("@prisma/client").Prisma.Prisma__UserClient<{
+        name: string;
+        email: string;
+        password: string;
+        id: number;
+        createdAt: Date;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
 }

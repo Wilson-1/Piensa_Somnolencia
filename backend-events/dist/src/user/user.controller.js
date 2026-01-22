@@ -15,39 +15,71 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
-const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
-const update_profile_dto_1 = require("./dto/update-profile.dto");
+const create_user_dto_1 = require("./dto/create-user.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
+const passport_1 = require("@nestjs/passport");
 let UserController = class UserController {
     userService;
     constructor(userService) {
         this.userService = userService;
     }
-    getProfile(req) {
-        const user = req.user;
-        return this.userService.getProfile(user.id);
+    create(createUserDto) {
+        return this.userService.create(createUserDto);
     }
-    updateProfile(req, dto) {
-        return this.userService.updateProfile(req.user.id, dto);
+    findAll() {
+        return this.userService.findAll();
+    }
+    findOne(id) {
+        const userId = Number(id);
+        if (isNaN(userId))
+            throw new common_1.BadRequestException('El id debe ser un número');
+        return this.userService.findOne(userId);
+    }
+    update(id, updateUserDto) {
+        return this.userService.update(+id, updateUserDto);
+    }
+    remove(id) {
+        return this.userService.remove(+id);
     }
 };
 exports.UserController = UserController;
 __decorate([
-    (0, common_1.Get)('profile'),
-    __param(0, (0, common_1.Req)()),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "getProfile", null);
+], UserController.prototype, "create", null);
 __decorate([
-    (0, common_1.Put)('profile'),
-    __param(0, (0, common_1.Req)()),
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "updateProfile", null);
+], UserController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "remove", null);
 exports.UserController = UserController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])
 ], UserController);

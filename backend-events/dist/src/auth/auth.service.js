@@ -44,44 +44,40 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
-const bcrypt = __importStar(require("bcrypt"));
 const jwt_1 = require("@nestjs/jwt");
+const bcrypt = __importStar(require("bcrypt"));
+const user_service_1 = require("../user/user.service");
 let AuthService = class AuthService {
-    prisma;
+    userService;
     jwtService;
-    constructor(prisma, jwtService) {
-        this.prisma = prisma;
+    constructor(userService, jwtService) {
+        this.userService = userService;
         this.jwtService = jwtService;
     }
-    async register(dto) {
-        const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
-        if (existing)
-            throw new common_1.BadRequestException({ message: 'Email already exists' });
-        const hashed = await bcrypt.hash(dto.password, 10);
-        await this.prisma.user.create({
-            data: { name: dto.name, email: dto.email, password: hashed }
-        });
-        return { message: 'User created successfully' };
+    async validateUser(email, password) {
+        const user = await this.userService.findByEmail(email);
+        if (user && await bcrypt.compare(password, user.password)) {
+            const { password, ...result } = user;
+            return result;
+        }
+        return null;
     }
-    async login(email, password) {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        if (!user)
-            throw new common_1.UnauthorizedException({ message: 'Invalid credentials' });
-        const valid = await bcrypt.compare(password, user.password);
-        if (!valid)
-            throw new common_1.UnauthorizedException({ message: 'Invalid credentials' });
-        const payload = { sub: user.id, email: user.email, name: user.name };
-        const token = this.jwtService.sign(payload);
+    async login(user) {
+        const payload = { username: user.email, sub: user.id };
         return {
-            token,
-            user: { id: user.id, name: user.name, email: user.email }
+            access_token: this.jwtService.sign(payload),
+            user,
         };
+    }
+    async register(createUserDto) {
+        const newUser = await this.userService.create(createUserDto);
+        return this.login(newUser);
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, jwt_1.JwtService])
+    __metadata("design:paramtypes", [user_service_1.UserService,
+        jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
