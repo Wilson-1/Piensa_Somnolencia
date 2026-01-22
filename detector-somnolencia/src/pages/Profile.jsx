@@ -8,12 +8,14 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
 
   async function loadProfile() {
     const token = localStorage.getItem("token");
-
+      const id=Number(localStorage.getItem('Id'))
+    if(token){
     try {
-      const res = await api.get("/user/profile", {
+      const res = await api.get(`user/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data);
@@ -22,6 +24,9 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
+  }
+    else{
+        console.log('Error al cargar perfil')}
   }
 
   function logout() {

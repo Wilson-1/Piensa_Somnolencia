@@ -15,8 +15,9 @@ export default function Login() {
 
     try {
       const res = await api.post("/auth/login", { email, password });
-
-      localStorage.setItem("token", res.data.token);
+      const { token, user } = res.data
+      localStorage.setItem("token", token);
+      localStorage.setItem("Id", user.id)
       navigate("/dashboard");
     } catch (error) {
       alert("Credenciales incorrectas o error al iniciar sesión");
