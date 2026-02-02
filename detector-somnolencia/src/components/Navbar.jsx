@@ -13,7 +13,7 @@ export default function Navbar() {
       bg-[#0a001a]/70 backdrop-blur-md border-b border-cyan-400/30 shadow-md neon-glow">
       
       <h1 className="text-3xl font-bold glow text-cyan-300 drop-shadow-lg">
-        ⚡ Somnolencia AI
+        Somnolencia 
       </h1>
 
       <div className="flex gap-6 text-lg">
